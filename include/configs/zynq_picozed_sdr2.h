@@ -25,6 +25,13 @@
 #define CONFIG_ZYNQ_EEPROM
 #define CONFIG_ZYNQ_BOOT_FREEBSD
 
+#define CONFIG_ZYNQ_PICOZED_SDR
+
+#define CONFIG_CMD_DIAG
+#define CONFIG_POST (CONFIG_SYS_POST_USB_MEDIA | \
+		     CONFIG_SYS_POST_LOOPBACK | \
+		     CONFIG_SYS_POST_AD9361)
+
 #include <configs/zynq-common.h>
 
-#endif /* __CONFIG_ZYNQ_PICOZED_SDR_H*/
+#endif /* __CONFIG_ZYNQ_PICOZED_SDR_H */

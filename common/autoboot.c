@@ -13,6 +13,9 @@
 #include <menu.h>
 #include <post.h>
 #include <u-boot/sha256.h>
+#ifdef CONFIG_POST
+#include <asm/gpio.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -334,10 +337,35 @@ const char *bootdelay_process(void)
 	bootretry_init_cmd_timeout();
 
 #ifdef CONFIG_POST
-	if (gd->flags & GD_FLG_POSTFAIL) {
-		s = getenv("failbootcmd");
-	} else
-#endif /* CONFIG_POST */
+	if (gd->flags & GD_FLG_POSTFAIL)
+		printf("\nTEST(S) FAILED\n");
+	else
+		printf("\nALL TESTS PASSED\n");
+	printf("Hit any key to continue ... \n");
+
+	while (!tstc()) {
+		if (gd->flags & GD_FLG_POSTFAIL) {
+			/* flashing LEDs for failing tests */
+			gpio_direction_output(0x3a, 1);
+			gpio_direction_output(0x3b, 1);
+			gpio_direction_output(0x3c, 1);
+			gpio_direction_output(0x3d, 1);
+			mdelay(250);
+			gpio_direction_output(0x3a, 0);
+			gpio_direction_output(0x3b, 0);
+			gpio_direction_output(0x3c, 0);
+			gpio_direction_output(0x3d, 0);
+			mdelay(250);
+		} else {
+			gpio_direction_output(0x3a, 1);
+			gpio_direction_output(0x3b, 1);
+			gpio_direction_output(0x3c, 1);
+			gpio_direction_output(0x3d, 1);
+		}
+	}
+	/* consume input */
+	(void) getc();
+#else
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	if (bootlimit && (bootcount > bootlimit)) {
 		printf("Warning: Bootlimit (%u) exceeded. Using altbootcmd.\n",
@@ -346,6 +374,7 @@ const char *bootdelay_process(void)
 	} else
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
 		s = getenv("bootcmd");
+#endif /* CONFIG_POST */
 
 	process_fdt_options(gd->fdt_blob);
 	stored_bootdelay = bootdelay;
