@@ -31,6 +31,9 @@ extern int dsp_post_test (int flags);
 extern int codec_post_test (int flags);
 extern int ecc_post_test (int flags);
 extern int flash_post_test(int flags);
+extern int usb_media_post_test (int flags);
+extern int loopback_post_test (int flags);
+extern int ad9361_post_test (int flags);
 
 extern int dspic_init_post_test (int flags);
 extern int dspic_post_test (int flags);
@@ -173,7 +176,7 @@ struct post_test post_list[] =
 	"ETHERNET test",
 	"ethernet",
 	"This test verifies the ETHERNET operation.",
-	POST_RAM | POST_ALWAYS | POST_MANUAL,
+	POST_RAM | POST_ALWAYS | POST_MANUAL | POST_CRITICAL,
 	&ether_post_test,
 	NULL,
 	NULL,
@@ -202,6 +205,42 @@ struct post_test post_list[] =
 	NULL,
 	NULL,
 	CONFIG_SYS_POST_USB
+    },
+#endif
+#if CONFIG_POST & CONFIG_SYS_POST_USB_MEDIA
+    {
+	"USB media test",
+	"usb_media",
+	"This test verifies pushing and pull data from USB media.",
+	POST_RAM | POST_ALWAYS | POST_MANUAL | POST_CRITICAL,
+	&usb_media_post_test,
+	NULL,
+	NULL,
+	CONFIG_SYS_POST_USB_MEDIA
+    },
+#endif
+#if CONFIG_POST & CONFIG_SYS_POST_LOOPBACK
+    {
+	"Loopback tests",
+	"loopback",
+	"This test verifies electrical connectivity using the text fixture platform.",
+	POST_RAM | POST_ALWAYS | POST_MANUAL | POST_CRITICAL,
+	&loopback_post_test,
+	NULL,
+	NULL,
+	CONFIG_SYS_POST_LOOPBACK
+    },
+#endif
+#if CONFIG_POST & CONFIG_SYS_POST_AD9361
+    {
+	"AD9361 tests",
+	"ad9361",
+	"This test verifies RF performance of the ad9361 part.",
+	POST_RAM | POST_ALWAYS | POST_MANUAL | POST_CRITICAL,
+	&ad9361_post_test,
+	NULL,
+	NULL,
+	CONFIG_SYS_POST_AD9361
     },
 #endif
 #if CONFIG_POST & CONFIG_SYS_POST_SPR
