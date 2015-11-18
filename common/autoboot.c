@@ -339,14 +339,10 @@ const char *bootdelay_process(void)
 	bootretry_init_cmd_timeout();
 
 #ifdef CONFIG_POST
-	if (gd->flags & GD_FLG_POSTFAIL)
-		printf("\nTEST(S) FAILED\n");
-	else
-		printf("\nALL TESTS PASSED\n");
-	printf("Hit any key to continue ... \n");
-
-	while (!tstc()) {
-		if (gd->flags & GD_FLG_POSTFAIL) {
+	if (gd->flags & GD_FLG_POSTFAIL) {
+		printf("\nTESTS FAILED\n");
+		printf("Hit any key to continue ... \n");
+		while (!tstc()) {
 			/* flashing LEDs for failing tests */
 			gpio_direction_output(0x3a, 1);
 			gpio_direction_output(0x3b, 1);
@@ -358,15 +354,16 @@ const char *bootdelay_process(void)
 			gpio_direction_output(0x3c, 0);
 			gpio_direction_output(0x3d, 0);
 			mdelay(250);
-		} else {
-			gpio_direction_output(0x3a, 1);
-			gpio_direction_output(0x3b, 1);
-			gpio_direction_output(0x3c, 1);
-			gpio_direction_output(0x3d, 1);
 		}
+		/* consume input */
+		(void) getc();
+	} else {
+		printf("\nALL TESTS PASSED\n");
+		gpio_direction_output(0x3a, 1);
+		gpio_direction_output(0x3b, 1);
+		gpio_direction_output(0x3c, 1);
+		gpio_direction_output(0x3d, 1);
 	}
-	/* consume input */
-	(void) getc();
 #else
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	if (bootlimit && (bootcount > bootlimit)) {
