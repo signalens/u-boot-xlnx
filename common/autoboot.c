@@ -310,6 +310,7 @@ const char *bootdelay_process(void)
 {
 	char *s;
 	int bootdelay;
+	unsigned long ts;
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	unsigned long bootcount = 0;
 	unsigned long bootlimit = 0;
@@ -339,10 +340,15 @@ const char *bootdelay_process(void)
 	bootretry_init_cmd_timeout();
 
 #ifdef CONFIG_POST
-	if (gd->flags & GD_FLG_POSTFAIL) {
+	if (gd->flags & GD_FLG_POSTFAIL)
 		printf("\nTESTS FAILED\n");
-		printf("Hit any key to continue ... \n");
-		while (!tstc()) {
+	else
+		printf("\nALL TESTS PASSED\n");
+
+	/* delay 5000 ms */
+	ts = get_timer(0);
+	do {
+		if (gd->flags & GD_FLG_POSTFAIL) {
 			/* flashing LEDs for failing tests */
 			gpio_direction_output(0x3a, 1);
 			gpio_direction_output(0x3b, 1);
@@ -354,16 +360,15 @@ const char *bootdelay_process(void)
 			gpio_direction_output(0x3c, 0);
 			gpio_direction_output(0x3d, 0);
 			mdelay(250);
+		} else {
+			gpio_direction_output(0x3a, 1);
+			gpio_direction_output(0x3b, 1);
+			gpio_direction_output(0x3c, 1);
+			gpio_direction_output(0x3d, 1);
 		}
-		/* consume input */
-		(void) getc();
-	} else {
-		printf("\nALL TESTS PASSED\n");
-		gpio_direction_output(0x3a, 1);
-		gpio_direction_output(0x3b, 1);
-		gpio_direction_output(0x3c, 1);
-		gpio_direction_output(0x3d, 1);
-	}
+	} while (get_timer(ts) < 5000);
+	/* reset board */
+	do_reset(NULL, 0, 0, NULL);
 #else
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	if (bootlimit && (bootcount > bootlimit)) {
