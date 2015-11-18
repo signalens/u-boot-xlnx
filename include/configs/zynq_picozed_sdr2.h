@@ -28,8 +28,7 @@
 #define CONFIG_ZYNQ_PICOZED_SDR
 
 #define CONFIG_CMD_DIAG
-#define CONFIG_POST (CONFIG_SYS_POST_USB_MEDIA | \
-		     CONFIG_SYS_POST_LOOPBACK | \
+#define CONFIG_POST (CONFIG_SYS_POST_LOOPBACK | \
 		     CONFIG_SYS_POST_AD9361)
 
 #include <configs/zynq-common.h>
