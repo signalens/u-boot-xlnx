@@ -280,6 +280,8 @@ static int abortboot_normal(int bootdelay)
 
 static int abortboot(int bootdelay)
 {
+	/* always abort boot */
+	return 1;
 #ifdef CONFIG_AUTOBOOT_KEYED
 	return abortboot_keyed(bootdelay);
 #else
