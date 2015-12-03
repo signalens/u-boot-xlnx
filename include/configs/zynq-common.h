@@ -293,6 +293,10 @@
 		"sf probe 0 0 0 && " \
 		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
 		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
+		"if test -n ${ad9361_ext_refclk}; then " \
+			"fdt addr ${devicetree_load_address} && " \
+			"fdt set /clocks/clock@0 clock-frequency ${ad9361_ext_refclk}; " \
+		"fi && " \
 		"echo Copying ramdisk... && " \
 		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
