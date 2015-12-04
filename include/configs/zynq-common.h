@@ -302,11 +302,11 @@
 			"fdt addr ${devicetree_load_address} && " \
 			"fdt set / model ${model}; " \
 		"fi && " \
-		"echo Copying ramdisk... && " \
-		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
 		"echo Copying bitstream... && " \
 		"sf read ${loadbit_addr} 0x1300000 ${bitstream_size} && " \
 		"fpga loadb 0 ${loadbit_addr} ${bitstream_size} && " \
+		"echo Copying ramdisk... && " \
+		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
