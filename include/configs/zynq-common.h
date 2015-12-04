@@ -266,6 +266,7 @@
 	"kernel_size=0x500000\0"	\
 	"devicetree_size=0x20000\0"	\
 	"ramdisk_size=0x5E0000\0"	\
+	"bitstream_size=0xD00000\0" \
 	"boot_size=0xF00000\0"	\
 	"fdt_high=0x20000000\0"	\
 	"initrd_high=0x20000000\0"	\
@@ -299,6 +300,9 @@
 		"fi && " \
 		"echo Copying ramdisk... && " \
 		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
+		"echo Copying bitstream... && " \
+		"sf read ${loadbit_addr} 0x1300000 ${bitstream_size} && " \
+		"fpga loadb 0 ${loadbit_addr} ${bitstream_size} && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
