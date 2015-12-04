@@ -298,6 +298,10 @@
 			"fdt addr ${devicetree_load_address} && " \
 			"fdt set /clocks/clock@0 clock-frequency ${ad9361_ext_refclk}; " \
 		"fi && " \
+		"if test -n ${model}; then " \
+			"fdt addr ${devicetree_load_address} && " \
+			"fdt set / model ${model}; " \
+		"fi && " \
 		"echo Copying ramdisk... && " \
 		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
 		"echo Copying bitstream... && " \
