@@ -290,7 +290,7 @@
 		"cp.b 0xE2620000 ${ramdisk_load_address} ${ramdisk_size} && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"qspiboot=echo Copying Linux from QSPI flash to RAM... && " \
-		"sf probe 0 0 0 && " \
+		"sf probe 0 && " \
 		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
 		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
 		"if test -n ${ad9361_ext_refclk}; then " \
