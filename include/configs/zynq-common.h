@@ -297,11 +297,11 @@
 		"if test -n ${ad9361_ext_refclk}; then " \
 			"fdt addr ${devicetree_load_address} && " \
 			"fdt set /clocks/clock@0 clock-frequency ${ad9361_ext_refclk}; " \
-		"fi && " \
+		"fi; " \
 		"if test -n ${model}; then " \
 			"fdt addr ${devicetree_load_address} && " \
 			"fdt set / model ${model}; " \
-		"fi && " \
+		"fi; " \
 		"echo Copying bitstream... && " \
 		"sf read ${loadbit_addr} 0x1300000 ${bitstream_size} && " \
 		"fpga loadb 0 ${loadbit_addr} ${bitstream_size} && " \
