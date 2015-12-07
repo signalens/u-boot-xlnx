@@ -290,17 +290,20 @@
 		"echo Copying ramdisk... && " \
 		"cp.b 0xE2620000 ${ramdisk_load_address} ${ramdisk_size} && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"qspiboot=echo Copying Linux from QSPI flash to RAM... && " \
-		"sf probe 0 && " \
-		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
-		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
-		"if test -n ${ad9361_ext_refclk}; then " \
+	"adi_loadvals=if test -n ${ad9361_ext_refclk}; then " \
 			"fdt addr ${devicetree_load_address} && " \
 			"fdt set /clocks/clock@0 clock-frequency ${ad9361_ext_refclk}; " \
 		"fi; " \
 		"if test -n ${model}; then " \
 			"fdt addr ${devicetree_load_address} && " \
 			"fdt set / model ${model}; " \
+		"fi\0" \
+	"qspiboot=echo Copying Linux from QSPI flash to RAM... && " \
+		"sf probe 0 && " \
+		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
+		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
+		"if run adi_loadvals; then " \
+			"echo Loaded AD9361 refclk frequency and model into devicetree; " \
 		"fi; " \
 		"echo Copying bitstream... && " \
 		"sf read ${loadbit_addr} 0x1300000 ${bitstream_size} && " \
