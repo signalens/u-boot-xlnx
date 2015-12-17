@@ -280,8 +280,6 @@ static int abortboot_normal(int bootdelay)
 
 static int abortboot(int bootdelay)
 {
-	/* always abort boot */
-	return 1;
 #ifdef CONFIG_AUTOBOOT_KEYED
 	return abortboot_keyed(bootdelay);
 #else
@@ -357,13 +355,8 @@ const char *bootdelay_process(void)
 		}
 		/* consume input */
 		(void) getc();
-	} else {
-		printf("\nALL TESTS PASSED\n");
-		gpio_direction_output(0x3a, 1);
-		gpio_direction_output(0x3b, 1);
-		gpio_direction_output(0x3c, 1);
-		gpio_direction_output(0x3d, 1);
 	}
+	s = getenv("bootcmd");
 #else
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	if (bootlimit && (bootcount > bootlimit)) {
