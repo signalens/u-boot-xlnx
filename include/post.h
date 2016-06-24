@@ -184,6 +184,7 @@ extern int memory_post_test(int flags);
 #define CONFIG_SYS_POST_USB_MEDIA	0x02000000
 #define CONFIG_SYS_POST_LOOPBACK	0x04000000
 #define CONFIG_SYS_POST_AD9361		0x08000000
+#define CONFIG_SYS_POST_BUTTONS		0x10000000
 
 #endif /* CONFIG_POST */
 

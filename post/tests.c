@@ -34,6 +34,7 @@ extern int flash_post_test(int flags);
 extern int usb_media_post_test (int flags);
 extern int loopback_post_test (int flags);
 extern int ad9361_post_test (int flags);
+extern int buttons_post_test (int flags);
 
 extern int dspic_init_post_test (int flags);
 extern int dspic_post_test (int flags);
@@ -181,6 +182,18 @@ struct post_test post_list[] =
 	NULL,
 	NULL,
 	CONFIG_SYS_POST_ETHER
+    },
+#endif
+#if CONFIG_POST & CONFIG_SYS_POST_BUTTONS
+    {
+	"BUTTONS test",
+	"buttons",
+	"This test verifies the hardware buttons/switches operation.",
+	POST_RAM | POST_ALWAYS | POST_MANUAL | POST_CRITICAL,
+	&buttons_post_test,
+	NULL,
+	NULL,
+	CONFIG_SYS_POST_BUTTONS
     },
 #endif
 #if CONFIG_POST & CONFIG_SYS_POST_SPI
