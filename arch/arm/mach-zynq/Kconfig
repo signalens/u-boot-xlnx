@@ -24,6 +24,9 @@ config TARGET_ZYNQ_PICOZED
 config TARGET_ZYNQ_PICOZED_SDR2
 	bool "Zynq PicoZed SDR2"
 
+config TARGET_ZYNQ_PICOZED_SDR2_BRK_TEST
+	bool "Zynq PicoZed SDR2 BRK TEST"
+
 config TARGET_ZYNQ_ZC70X
 	bool "Zynq ZC702/ZC706 Board (deprecated)"
 	select ZYNQ_CUSTOM_INIT
@@ -80,4 +83,5 @@ config SYS_CONFIG_NAME
 	default "zynq_afx" if TARGET_ZYNQ_AFX
 	default "zynq_cc108" if TARGET_ZYNQ_CC108
 	default "zynq_picozed_sdr2" if TARGET_ZYNQ_PICOZED_SDR2
+	default "zynq_picozed_sdr2_brk_test" if TARGET_ZYNQ_PICOZED_SDR2_BRK_TEST
 endif
