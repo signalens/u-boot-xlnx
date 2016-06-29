@@ -92,6 +92,32 @@ int gpio_get_value(unsigned gpio)
 	return (data >> bank_pin_num) & 1;
 }
 
+/*
+ * get a number comprised of multiple GPIO values. gpio_num_array points to
+ * the array of gpio pin numbers to scan, terminated by -1.
+ * TODO: Copied directly from the generic gpio driver model support, zynq gpio
+ * should be migrated to that in the future instead.
+ */
+int gpio_get_values_as_int(const int *gpio_list)
+{
+	int gpio;
+	unsigned bitmask = 1;
+	unsigned vector = 0;
+	int ret;
+
+	while (bitmask &&
+	       ((gpio = *gpio_list++) != -1)) {
+		ret = gpio_get_value(gpio);
+		if (ret < 0)
+			return ret;
+		else if (ret)
+			vector |= bitmask;
+		bitmask <<= 1;
+	}
+
+	return vector;
+}
+
 /**
  * gpio_set_value - Modify the value of the pin with specified value
  * @gpio:	gpio pin number within the device
