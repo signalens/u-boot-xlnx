@@ -12,6 +12,7 @@
 
 #define CONFIG_ZYNQ_I2C0
 #define CONFIG_ZYNQ_EEPROM
+#define CONFIG_DFU_SF
 
 #include <configs/zynq-common.h>
 
