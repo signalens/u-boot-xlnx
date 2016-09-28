@@ -15,6 +15,8 @@
 # define CONFIG_CPU_FREQ_HZ	800000000
 #endif
 
+#define	CONFIG_SYS_DEVICE_NULLDEV	1
+
 /* Cache options */
 #define CONFIG_SYS_CACHELINE_SIZE	32
 
@@ -96,6 +98,15 @@
 	"${bitstream_image} raw 0x1300000 0xD00000\0" \
 	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0\0"
 
+# define DFU_ALT_INFO_SF1 \
+	"dfu_sf1_info="\
+	"set dfu_alt_info " \
+	"${boot_image} raw 0x0 0xE0000\\\\;" \
+	"${kernel_image} raw 0x100000 0x500000\\\\;" \
+	"${devicetree_image} raw 0x600000 0x20000\\\\;" \
+	"${ramdisk_image} raw 0x620000 0xCE0000\\\\;" \
+	"${bitstream_image} raw 0x1300000 0xD00000\0" \
+	"dfu_sf1=run dfu_sf1_info && dfu 0 sf 0:0:40000000:0\0"
 
 #ifdef CONFIG_USB_EHCI_ZYNQ
 # define CONFIG_EHCI_IS_TDI
@@ -260,7 +271,7 @@
 			"fdt addr ${devicetree_load_address} && " \
 			"fdt set / model ${model}; " \
 		"fi\0" \
-"qspiboot=echo Copying Linux from QSPI flash to RAM... && " \
+	"qspiboot_norm=echo Copying Linux from QSPI flash to RAM... && " \
 		"sf probe 0:0 50000000 0 && " \
 		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
 		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
@@ -273,6 +284,19 @@
 		"echo Copying ramdisk... && " \
 		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
 		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk && " \
+		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
+	"qspiboot=itest *f8000258 -eq 480000 && echo Entering DFU mode ... && run dfu_sf1; " \
+		"echo Booting silently && set stdout nulldev; " \
+		"sf probe 0:0 50000000 0 && " \
+		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
+		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
+		"if run adi_loadvals; then " \
+		"echo Loaded AD9361 refclk frequency and model into devicetree; " \
+		"fi; " \
+		"sf read ${loadbit_addr} 0x1300000 ${bitstream_size} && " \
+		"fpga loadb 0 ${loadbit_addr} ${bitstream_size} && " \
+		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
+		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
@@ -339,7 +363,8 @@
 		"zynqrsa 0x100000 && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	DFU_ALT_INFO \
-	DFU_ALT_INFO_SF
+	DFU_ALT_INFO_SF \
+	DFU_ALT_INFO_SF1
 	#endif
 
 /* default boot is according to the bootmode switch settings */
