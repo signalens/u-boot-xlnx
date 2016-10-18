@@ -1273,6 +1273,17 @@ int boot_get_fpga(int argc, char * const argv[], bootm_headers_t *images,
 			return fit_img_result;
 		}
 
+
+
+#if defined(CONFIG_FPGA_XILINX_WA_BROKEN_PARTIAL_CONFIG_CHECK)
+		name = "full";
+		err = fpga_loadbitstream(devnum, (char *)img_data,
+					img_len, BIT_FULL);
+		if (err)
+			err = fpga_load(devnum, (const void *)img_data,
+					img_len, BIT_FULL);
+#else
+		/* This check fails for compressed bit streams */
 		if (img_len >= desc_xilinx->size) {
 			name = "full";
 			err = fpga_loadbitstream(devnum, (char *)img_data,
@@ -1288,6 +1299,7 @@ int boot_get_fpga(int argc, char * const argv[], bootm_headers_t *images,
 				err = fpga_load(devnum, (const void *)img_data,
 						img_len, BIT_PARTIAL);
 		}
+#endif
 
 		printf("   Programming %s bitstream... ", name);
 		if (err)

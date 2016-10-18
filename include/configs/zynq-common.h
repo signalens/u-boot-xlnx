@@ -418,6 +418,10 @@
 /* Enable the PL to be downloaded */
 #define CONFIG_FPGA
 #define CONFIG_FPGA_XILINX
+
+/* Check to compare bitstream size with desc_xilinx->size fails with compressed bits */
+#define CONFIG_FPGA_XILINX_WA_BROKEN_PARTIAL_CONFIG_CHECK
+
 #define CONFIG_FPGA_ZYNQPL
 #define CONFIG_CMD_FPGA_LOADMK
 #define CONFIG_CMD_FPGA_LOADP
