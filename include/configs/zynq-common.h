@@ -99,14 +99,11 @@
 	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0\0"
 
 # define DFU_ALT_INFO_SF1 \
-	"dfu_sf1_info="\
+	"dfu_sf_info="\
 	"set dfu_alt_info " \
 	"${boot_image} raw 0x0 0xE0000\\\\;" \
-	"${kernel_image} raw 0x100000 0x500000\\\\;" \
-	"${devicetree_image} raw 0x600000 0x20000\\\\;" \
-	"${ramdisk_image} raw 0x620000 0xCE0000\\\\;" \
-	"${bitstream_image} raw 0x1300000 0xD00000\0" \
-	"dfu_sf1=run dfu_sf1_info && dfu 0 sf 0:0:40000000:0\0"
+	"${kernel_image} raw 0x200000 0xE00000\0" \
+	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0\0"
 
 #ifdef CONFIG_USB_EHCI_ZYNQ
 # define CONFIG_EHCI_IS_TDI
@@ -215,7 +212,7 @@
 
 # define CONFIG_ENV_SECT_SIZE		CONFIG_ENV_SIZE
 # ifndef CONFIG_ENV_OFFSET
-#  define CONFIG_ENV_OFFSET		0xE0000
+#  define CONFIG_ENV_OFFSET		0x100000
 # endif
 #endif
 
@@ -236,7 +233,7 @@
 	"boot_image=BOOT.bin\0"	\
 	"loadbit_addr=0x100000\0"	\
 	"loadbootenv_addr=0x2000000\0" \
-	"kernel_size=0x400000\0"	\
+	"kernel_size=0x800000\0"	\
 	"devicetree_size=0x20000\0"	\
 	"ramdisk_size=0x400000\0"	\
 	"bitstream_size=0x400000\0" \
@@ -253,51 +250,30 @@
 				"then env run importbootenv; " \
 			"fi; " \
 		"fi; \0" \
-	"mmc_loadbit=echo Loading bitstream from SD/MMC/eMMC to RAM.. && " \
-		"mmcinfo && " \
-		"load mmc 0 ${loadbit_addr} ${bitstream_image} && " \
-		"fpga load 0 ${loadbit_addr} ${filesize}\0" \
-	"norboot=echo Copying Linux from NOR flash to RAM... && " \
-		"cp.b 0xE2100000 ${kernel_load_address} ${kernel_size} && " \
-		"cp.b 0xE2600000 ${devicetree_load_address} ${devicetree_size} && " \
-		"echo Copying ramdisk... && " \
-		"cp.b 0xE2620000 ${ramdisk_load_address} ${ramdisk_size} && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"adi_loadvals=if test -n ${ad9361_ext_refclk}; then " \
-			"fdt addr ${devicetree_load_address} && " \
-			"fdt set /clocks/clock@0 clock-frequency ${ad9361_ext_refclk}; " \
+	"fdt addr ${kernel_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
+		"fdt addr ${fdtaddr} && " \
+		"fdt set /clocks/clock@0 clock-frequency ${ad9361_ext_refclk}; " \
 		"fi; " \
 		"if test -n ${model}; then " \
-			"fdt addr ${devicetree_load_address} && " \
+		"fdt addr ${kernel_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
+			"fdt addr ${fdtaddr} && " \
 			"fdt set / model ${model}; " \
 		"fi\0" \
-	"qspiboot_norm=echo Copying Linux from QSPI flash to RAM... && " \
+	"qspiboot_verbose=echo Copying Linux from QSPI flash to RAM... && " \
 		"sf probe 0:0 50000000 0 && " \
-		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
-		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
-		"if run adi_loadvals; then " \
-			"echo Loaded AD9361 refclk frequency and model into devicetree; " \
-		"fi; " \
-		"echo Copying bitstream... && " \
-		"sf read ${loadbit_addr} 0x1300000 ${bitstream_size} && " \
-		"fpga loadb 0 ${loadbit_addr} ${bitstream_size} && " \
-		"echo Copying ramdisk... && " \
-		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
+		"sf read ${kernel_load_address} 0x200000 ${kernel_size} && " \
 		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"qspiboot=itest *f8000258 -eq 480000 && echo Entering DFU mode ... && run dfu_sf1; " \
+		"bootm ${kernel_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+	"qspiboot=itest *f8000258 -eq 480000 && echo Entering DFU mode ... && run dfu_sf; " \
 		"echo Booting silently && set stdout nulldev; " \
 		"sf probe 0:0 50000000 0 && " \
-		"sf read ${kernel_load_address} 0x100000 ${kernel_size} && " \
-		"sf read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
+		"sf read ${kernel_load_address} 0x200000 ${kernel_size} && " \
 		"if run adi_loadvals; then " \
 		"echo Loaded AD9361 refclk frequency and model into devicetree; " \
 		"fi; " \
-		"sf read ${loadbit_addr} 0x1300000 ${bitstream_size} && " \
-		"fpga loadb 0 ${loadbit_addr} ${bitstream_size} && " \
-		"sf read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
 		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
+		"bootm ${kernel_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
 			"echo Loaded environment from ${bootenv}; " \
@@ -307,21 +283,6 @@
 			"echo Running uenvcmd ...; " \
 			"run uenvcmd; " \
 		"fi\0" \
-	"sdboot=if mmcinfo; then " \
-			"run uenvboot; " \
-			"echo Copying Linux from SD to RAM... && " \
-			"fatload mmc 0 ${kernel_load_address} ${kernel_image} && " \
-			"fatload mmc 0 ${devicetree_load_address} ${devicetree_image} && " \
-			"if run adi_loadvals; then " \
-				"echo Loaded AD9361 refclk frequency and model into devicetree; " \
-			"fi; " \
-			"if fatload mmc 0 ${ramdisk_load_address} ${ramdisk_image}; then " \
-				"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}; " \
-			"else " \
-				"setenv bootargs console=ttyPS0,115200 root=/dev/mmcblk0p2 rw earlyprintk rootfstype=ext4 rootwait && " \
-				"bootm ${kernel_load_address} - ${devicetree_load_address}; " \
-			"fi; " \
-		"fi\0" \
 	"usbboot=if usb start; then " \
 			"run uenvboot; " \
 			"echo Copying Linux from USB to RAM... && " \
@@ -330,40 +291,7 @@
 			"load usb 0 ${ramdisk_load_address} ${ramdisk_image} && " \
 			"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}; " \
 		"fi\0" \
-	"nandboot=echo Copying Linux from NAND flash to RAM... && " \
-		"nand read ${kernel_load_address} 0x100000 ${kernel_size} && " \
-		"nand read ${devicetree_load_address} 0x600000 ${devicetree_size} && " \
-		"echo Copying ramdisk... && " \
-		"nand read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"jtagboot=echo TFTPing Linux to RAM... && " \
-		"tftpboot ${kernel_load_address} ${kernel_image} && " \
-		"tftpboot ${devicetree_load_address} ${devicetree_image} && " \
-		"tftpboot ${ramdisk_load_address} ${ramdisk_image} && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"rsa_norboot=echo Copying Image from NOR flash to RAM... && " \
-		"cp.b 0xE2100000 0x100000 ${boot_size} && " \
-		"zynqrsa 0x100000 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"rsa_nandboot=echo Copying Image from NAND flash to RAM... && " \
-		"nand read 0x100000 0x0 ${boot_size} && " \
-		"zynqrsa 0x100000 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"rsa_qspiboot=echo Copying Image from QSPI flash to RAM... && " \
-		"sf probe 0 0 0 && " \
-		"sf read 0x100000 0x0 ${boot_size} && " \
-		"zynqrsa 0x100000 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"rsa_sdboot=echo Copying Image from SD to RAM... && " \
-		"load mmc 0 0x100000 ${boot_image} && " \
-		"zynqrsa 0x100000 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
-	"rsa_jtagboot=echo TFTPing Image to RAM... && " \
-		"tftpboot 0x100000 ${boot_image} && " \
-		"zynqrsa 0x100000 && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	DFU_ALT_INFO \
-	DFU_ALT_INFO_SF \
 	DFU_ALT_INFO_SF1
 	#endif
 
