@@ -101,7 +101,7 @@
 # define DFU_ALT_INFO_SF1 \
 	"dfu_sf_info="\
 	"set dfu_alt_info " \
-	"${boot_image} raw 0x0 0xE0000\\\\;" \
+	"${boot_image} raw 0x0 0x100000\\\\;" \
 	"${kernel_image} raw 0x200000 0xE00000\0" \
 	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0\0"
 
@@ -223,6 +223,9 @@
 #ifndef CONFIG_EXTRA_ENV_SETTINGS
 #define CONFIG_EXTRA_ENV_SETTINGS	\
 	"ethaddr=00:0a:35:00:01:22\0"	\
+	"ipaddr=192.168.2.1\0"	\
+	"ipaddr_host=192.168.2.10\0"	\
+	"netmask=255.255.255.0\0"	\
 	"kernel_image=uImage\0"	\
 	"kernel_load_address=0x2080000\0" \
 	"ramdisk_image=uramdisk.image.gz\0"	\
@@ -273,7 +276,7 @@
 		"echo Loaded AD9361 refclk frequency and model into devicetree; " \
 		"fi; " \
 		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 && " \
-		"bootm ${kernel_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+		"bootm ${kernel_load_address} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
 			"echo Loaded environment from ${bootenv}; " \
