@@ -101,8 +101,8 @@
 # define DFU_ALT_INFO_SF1 \
 	"dfu_sf_info="\
 	"set dfu_alt_info " \
-	"${boot_image} raw 0x0 0x100000\\\\;" \
-	"${kernel_image} raw 0x200000 0xE00000\0" \
+	"BOOT.dfu raw 0x0 0x100000\\\\;" \
+	"pluto.dfu raw 0x200000 0xE00000\0" \
 	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0\0"
 
 #ifdef CONFIG_USB_EHCI_ZYNQ
