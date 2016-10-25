@@ -868,6 +868,15 @@ int stm_lock(struct spi_flash *flash, u32 ofs, size_t len)
 	if (ret < 0)
 		return ret;
 
+	if (ofs == 0 && len == (1024 * 1024)) {
+		status_new = status_old & ~(SR_BP2 | SR_BP1 | SR_BP0 | SR_BP3| SR_TB);
+		status_new |= SR_BP2 | SR_BP0 | SR_TB;
+		write_sr(flash, status_new);
+		printf("SF: Locked\n");
+		return 0;
+	}
+
+
 	/* SPI NOR always locks to the end */
 	if (ofs + len != flash->size) {
 		/* Does combined region extend to end? */
@@ -921,6 +930,13 @@ int stm_unlock(struct spi_flash *flash, u32 ofs, size_t len)
 	ret = read_sr(flash, &status_old);
 	if (ret < 0)
 		return ret;
+
+	if (ofs == 0 && len == (1024 * 1024)) {
+		status_new = status_old & ~(SR_BP2 | SR_BP1 | SR_BP0 | SR_BP3| SR_TB);
+		write_sr(flash, status_new);
+		printf("SF: Unlocked\n");
+		return 0;
+	}
 
 	/* Cannot unlock; would unlock larger region than requested */
 	if (stm_is_locked_sr(flash, ofs - flash->erase_size, flash->erase_size,
