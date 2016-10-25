@@ -272,6 +272,8 @@
 		"echo Booting silently && set stdout nulldev; " \
 		"sf probe 0:0 50000000 0 && " \
 		"sf read ${kernel_load_address} 0x200000 ${kernel_size} && " \
+		"iminfo ${kernel_load_address} || " \
+		"sf read ${kernel_load_address} 0x200000  0x1E00000 && " \
 		"if run adi_loadvals; then " \
 		"echo Loaded AD9361 refclk frequency and model into devicetree; " \
 		"fi; " \
