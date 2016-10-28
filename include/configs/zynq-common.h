@@ -103,7 +103,8 @@
 	"set dfu_alt_info " \
 	"BOOT.dfu raw 0x0 0x100000\\\\;" \
 	"pluto.dfu raw 0x200000 0xE00000\0" \
-	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0\0"
+	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0 && if test -n ${dfu_alt_num} && test ${dfu_alt_num} = 1; "\
+	"then set fit_size ${filesize} && set dfu_alt_num && env save; fi;\0"
 
 #ifdef CONFIG_USB_EHCI_ZYNQ
 # define CONFIG_EHCI_IS_TDI
@@ -227,7 +228,7 @@
 	"ipaddr_host=192.168.2.10\0"	\
 	"netmask=255.255.255.0\0"	\
 	"kernel_image=uImage\0"	\
-	"kernel_load_address=0x2080000\0" \
+	"fit_load_address=0x2080000\0" \
 	"ramdisk_image=uramdisk.image.gz\0"	\
 	"ramdisk_load_address=0x4000000\0"	\
 	"devicetree_image=devicetree.dtb\0"	\
@@ -236,7 +237,7 @@
 	"boot_image=BOOT.bin\0"	\
 	"loadbit_addr=0x100000\0"	\
 	"loadbootenv_addr=0x2000000\0" \
-	"kernel_size=0x800000\0"	\
+	"fit_size=0x800000\0"	\
 	"devicetree_size=0x20000\0"	\
 	"ramdisk_size=0x400000\0"	\
 	"bitstream_size=0x400000\0" \
@@ -253,32 +254,32 @@
 				"then env run importbootenv; " \
 			"fi; " \
 		"fi; \0" \
-	"adi_loadvals=if test -n ${ad9361_ext_refclk}; then " \
-	"fdt addr ${kernel_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
+	"adi_loadvals=if test -n ${ad936x_ext_refclk}; then " \
+	"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
 		"fdt addr ${fdtaddr} && " \
-		"fdt set /clocks/clock@0 clock-frequency ${ad9361_ext_refclk}; " \
+		"fdt set /clocks/clock@0 clock-frequency ${ad936x_ext_refclk}; " \
 		"fi; " \
 		"if test -n ${model}; then " \
-		"fdt addr ${kernel_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
+		"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
 			"fdt addr ${fdtaddr} && " \
 			"fdt set / model ${model}; " \
 		"fi\0" \
 	"qspiboot_verbose=echo Copying Linux from QSPI flash to RAM... && " \
 		"sf probe 0:0 50000000 0 && " \
-		"sf read ${kernel_load_address} 0x200000 ${kernel_size} && " \
+		"sf read ${fit_load_address} 0x200000 ${fit_size} && " \
 		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk && " \
-		"bootm ${kernel_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+		"bootm ${fit_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"qspiboot=itest *f8000258 -eq 480000 && echo Entering DFU mode ... && run dfu_sf; " \
 		"echo Booting silently && set stdout nulldev; " \
 		"sf probe 0:0 50000000 0 && " \
-		"sf read ${kernel_load_address} 0x200000 ${kernel_size} && " \
-		"iminfo ${kernel_load_address} || " \
-		"sf read ${kernel_load_address} 0x200000  0x1E00000 && " \
+		"sf read ${fit_load_address} 0x200000 ${fit_size} && " \
+		"iminfo ${fit_load_address} || " \
+		"sf read ${fit_load_address} 0x200000  0x1E00000 && " \
 		"if run adi_loadvals; then " \
-		"echo Loaded AD9361 refclk frequency and model into devicetree; " \
+		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
 		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 && " \
-		"bootm ${kernel_load_address} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+		"bootm ${fit_load_address} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
 			"echo Loaded environment from ${bootenv}; " \
@@ -291,10 +292,10 @@
 	"usbboot=if usb start; then " \
 			"run uenvboot; " \
 			"echo Copying Linux from USB to RAM... && " \
-			"load usb 0 ${kernel_load_address} ${kernel_image} && " \
+			"load usb 0 ${fit_load_address} ${kernel_image} && " \
 			"load usb 0 ${devicetree_load_address} ${devicetree_image} && " \
 			"load usb 0 ${ramdisk_load_address} ${ramdisk_image} && " \
-			"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}; " \
+			"bootm ${fit_load_address} ${ramdisk_load_address} ${devicetree_load_address}; " \
 		"fi\0" \
 	DFU_ALT_INFO \
 	DFU_ALT_INFO_SF1

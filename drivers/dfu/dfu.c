@@ -181,6 +181,9 @@ int dfu_flush(struct dfu_entity *dfu, void *buf, int size, int blk_seq_num)
 	if (ret)
 		return ret;
 
+	setenv_hex("dfu_alt_num", (ulong) dfu->alt);
+	setenv_hex("filesize", (ulong) dfu->offset);
+
 	if (dfu->flush_medium)
 		ret = dfu->flush_medium(dfu);
 
