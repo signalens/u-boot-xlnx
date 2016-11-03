@@ -102,7 +102,9 @@
 	"dfu_sf_info="\
 	"set dfu_alt_info " \
 	"BOOT.dfu raw 0x0 0x100000\\\\;" \
-	"pluto.dfu raw 0x200000 0xE00000\0" \
+	"pluto.dfu raw 0x200000 0xE00000\\\\;" \
+	"env.dfu raw 0x100000 0x20000\\\\;" \
+	"spare.dfu raw 0x120000 0xE0000\0" \
 	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0 && if test -n ${dfu_alt_num} && test ${dfu_alt_num} = 1; "\
 	"then set fit_size ${filesize} && set dfu_alt_num && env save; fi;\0"
 
@@ -255,7 +257,7 @@
 			"fi; " \
 		"fi; \0" \
 	"adi_loadvals=if test -n ${ad936x_ext_refclk}; then " \
-	"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
+		"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
 		"fdt addr ${fdtaddr} && " \
 		"fdt set /clocks/clock@0 clock-frequency ${ad936x_ext_refclk}; " \
 		"fi; " \
@@ -263,22 +265,27 @@
 		"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
 			"fdt addr ${fdtaddr} && " \
 			"fdt set / model ${model}; " \
-		"fi\0" \
-	"qspiboot_verbose=echo Copying Linux from QSPI flash to RAM... && " \
-		"sf probe 0:0 50000000 0 && " \
-		"sf read ${fit_load_address} 0x200000 ${fit_size} && " \
-		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk && " \
-		"bootm ${fit_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
-	"qspiboot=itest *f8000258 -eq 480000 && echo Entering DFU mode ... && run dfu_sf; " \
-		"echo Booting silently && set stdout nulldev; " \
-		"sf probe 0:0 50000000 0 && " \
+		"fi; " \
+		"if test -n ${attr_name}; then " \
+			"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
+			"fdt addr ${fdtaddr} && " \
+			"fdt set /amba/spi@e0006000/ad9361-phy@0 ${attr_name} ${attr_val}; " \
+		 "fi \0" \
+		"read_sf=sf probe 0:0 50000000 0 && " \
 		"sf read ${fit_load_address} 0x200000 ${fit_size} && " \
 		"iminfo ${fit_load_address} || " \
-		"sf read ${fit_load_address} 0x200000  0x1E00000 && " \
+		"sf read ${fit_load_address} 0x200000  0x1E00000; \0" \
+	"qspiboot_verbose=echo Copying Linux from QSPI flash to RAM... && " \
+		"run read_sf && " \
 		"if run adi_loadvals; then " \
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
-		"setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 && " \
+		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
+		"bootm ${fit_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+	"qspiboot=itest *f8000258 -eq 480000 || itest *f8000258 -eq 490000 && echo Entering DFU mode ... && run dfu_sf; " \
+		"echo Booting silently && set stdout nulldev; " \
+		"run read_sf && run adi_loadvals; " \
+		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
