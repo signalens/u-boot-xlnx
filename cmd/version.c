@@ -17,6 +17,7 @@ const char __weak version_string[] = U_BOOT_VERSION_STRING;
 
 static int do_version(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
+	setenv("uboot-version", version_string);
 	printf("\n%s\n", version_string);
 #ifdef CC_VERSION_STRING
 	puts(CC_VERSION_STRING "\n");
@@ -30,8 +31,14 @@ static int do_version(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	return 0;
 }
 
+static int do_env_version(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	setenv("uboot-version", version_string);
+	return 0;
+}
+
 U_BOOT_CMD(
-	version,	1,		1,	do_version,
-	"print monitor, compiler and linker version",
+	envversion,	1,		1,	do_env_version,
+	"set env variable uboot-version",
 	""
 );
