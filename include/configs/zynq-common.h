@@ -282,7 +282,7 @@
 		"fi; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
-	"qspiboot=itest *f8000258 -eq 480000 || itest *f8000258 -eq 490000 && echo Entering DFU mode ... && run dfu_sf; " \
+	"qspiboot=itest *f8000258 -ge 480000 && echo Entering DFU mode ... && run dfu_sf; " \
 		"echo Booting silently && set stdout nulldev; " \
 		"run read_sf && run adi_loadvals; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
