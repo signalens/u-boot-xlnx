@@ -59,9 +59,30 @@
 
 /* QSPI */
 #ifdef CONFIG_ZYNQ_QSPI
-# define CONFIG_SF_DEFAULT_SPEED	30000000
+# define CONFIG_SF_DEFAULT_SPEED	50000000
 # define CONFIG_SF_DUAL_FLASH
 #endif
+
+# define DFU_ALT_INFO_SF \
+"dfu_sf_info="\
+"set dfu_alt_info " \
+"${boot_image} raw 0x0 0xE0000\\\\;" \
+"${kernel_image} raw 0x100000 0x500000\\\\;" \
+"${devicetree_image} raw 0x600000 0x20000\\\\;" \
+"${ramdisk_image} raw 0x620000 0xCE0000\\\\;" \
+"${bitstream_image} raw 0x1300000 0xD00000\0" \
+"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0\0"
+
+# define DFU_ALT_INFO_SF1 \
+"dfu_sf_info="\
+"set dfu_alt_info " \
+"BOOT.dfu raw 0x0 0x100000\\\\;" \
+"pluto.dfu raw 0x200000 0xE00000\\\\;" \
+"uboot-env.dfu raw 0x100000 0x20000\\\\;" \
+"spare.dfu raw 0x120000 0xE0000\0" \
+"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0 && if test -n ${dfu_alt_num} && test ${dfu_alt_num} = 1; "\
+"then set fit_size ${filesize} && set dfu_alt_num && env save; fi;\0"
+
 
 /* NOR */
 #ifndef CONFIG_SYS_NO_FLASH
@@ -88,26 +109,6 @@
 # define CONFIG_ZYNQ_SDHCI_MAX_FREQ	52000000
 #endif
 
-# define DFU_ALT_INFO_SF \
-	"dfu_sf_info="\
-	"set dfu_alt_info " \
-	"${boot_image} raw 0x0 0xE0000\\\\;" \
-	"${kernel_image} raw 0x100000 0x500000\\\\;" \
-	"${devicetree_image} raw 0x600000 0x20000\\\\;" \
-	"${ramdisk_image} raw 0x620000 0xCE0000\\\\;" \
-	"${bitstream_image} raw 0x1300000 0xD00000\0" \
-	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0\0"
-
-# define DFU_ALT_INFO_SF1 \
-	"dfu_sf_info="\
-	"set dfu_alt_info " \
-	"BOOT.dfu raw 0x0 0x100000\\\\;" \
-	"pluto.dfu raw 0x200000 0xE00000\\\\;" \
-	"env.dfu raw 0x100000 0x20000\\\\;" \
-	"spare.dfu raw 0x120000 0xE0000\0" \
-	"dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0 && if test -n ${dfu_alt_num} && test ${dfu_alt_num} = 1; "\
-	"then set fit_size ${filesize} && set dfu_alt_num && env save; fi;\0"
-
 #ifdef CONFIG_USB_EHCI_ZYNQ
 # define CONFIG_EHCI_IS_TDI
 # define CONFIG_USB_MAX_CONTROLLER_COUNT	2
@@ -123,9 +124,8 @@
 # define DFU_ALT_INFO_RAM \
 	"dfu_ram_info=" \
 	"set dfu_alt_info " \
-	"${kernel_image} ram 0x3000000 0x500000\\\\;" \
-	"${devicetree_image} ram 0x2A00000 0x20000\\\\;" \
-	"${ramdisk_image} ram 0x2000000 0x600000\0" \
+	"dummy.dfu ram 0 0\\\\;" \
+	"pluto.dfu ram ${fit_load_address} 0x1E00000\0" \
 	"dfu_ram=run dfu_ram_info && dfu 0 ram 0\0" \
 	"thor_ram=run dfu_ram_info && thordown 0 ram 0\0"
 
@@ -247,6 +247,7 @@
 	"fdt_high=0x20000000\0"	\
 	"initrd_high=0x20000000\0"	\
 	"bootenv=uEnv.txt\0" \
+	"clear_reset_cause=mw f8000008 df0d && mw f8000258 00400000 && mw f8000004 767b\0" \
 	"loadbootenv=load mmc 0 ${loadbootenv_addr} ${bootenv}\0" \
 	"importbootenv=echo Importing environment from SD ...; " \
 		"env import -t ${loadbootenv_addr} $filesize\0" \
@@ -275,6 +276,13 @@
 		"sf read ${fit_load_address} 0x200000 ${fit_size} && " \
 		"iminfo ${fit_load_address} || " \
 		"sf read ${fit_load_address} 0x200000  0x1E00000; \0" \
+	"ramboot_verbose=echo Copying Linux from DFU to RAM... && " \
+		"run dfu_ram;" \
+		"if run adi_loadvals; then " \
+		"echo Loaded AD936x refclk frequency and model into devicetree; " \
+		"fi; " \
+		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
+		"bootm ${fit_load_address}\0" \
 	"qspiboot_verbose=echo Copying Linux from QSPI flash to RAM... && " \
 		"run read_sf && " \
 		"if run adi_loadvals; then " \
@@ -282,7 +290,8 @@
 		"fi; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
-	"qspiboot=itest *f8000258 -ge 480000 && echo Entering DFU mode ... && run dfu_sf; " \
+	"qspiboot=itest *f8000258 == 480000 && echo Entering DFU SF mode ... && run clear_reset_cause && run dfu_sf; " \
+		"itest *f8000258 == 480007 && echo Entering DFU RAM mode ... && run clear_reset_cause && run ramboot_verbose; " \
 		"echo Booting silently && set stdout nulldev; " \
 		"run read_sf && run adi_loadvals; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
