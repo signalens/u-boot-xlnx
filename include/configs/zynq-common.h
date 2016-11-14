@@ -231,6 +231,7 @@
 	"netmask=255.255.255.0\0"	\
 	"kernel_image=uImage\0"	\
 	"fit_load_address=0x2080000\0" \
+	"extraenv_load_address=0x207E000\0" \
 	"ramdisk_image=uramdisk.image.gz\0"	\
 	"ramdisk_load_address=0x4000000\0"	\
 	"devicetree_image=devicetree.dtb\0"	\
@@ -272,7 +273,9 @@
 			"fdt addr ${fdtaddr} && " \
 			"fdt set /amba/spi@e0006000/ad9361-phy@0 ${attr_name} ${attr_val}; " \
 		 "fi \0" \
-		"read_sf=sf probe 0:0 50000000 0 && " \
+	"qspiboot_extraenv=sf read ${extraenv_load_address} 0xFF000 0x1000 && " \
+		"env import -c ${extraenv_load_address} 0x1000 || true \0" \
+	"read_sf=sf probe 0:0 50000000 0 && run qspiboot_extraenv &&" \
 		"sf read ${fit_load_address} 0x200000 ${fit_size} && " \
 		"iminfo ${fit_load_address} || " \
 		"sf read ${fit_load_address} 0x200000  0x1E00000; \0" \
