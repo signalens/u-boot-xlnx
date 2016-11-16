@@ -76,8 +76,9 @@
 # define DFU_ALT_INFO_SF1 \
 "dfu_sf_info="\
 "set dfu_alt_info " \
-"BOOT.dfu raw 0x0 0x100000\\\\;" \
-"pluto.dfu raw 0x200000 0xE00000\\\\;" \
+"boot.dfu raw 0x0 0x100000\\\\;" \
+"pluto.dfu raw 0x200000 0x1E00000\\\\;" \
+"uboot-extra-env.dfu raw 0xFF000 0x1000\\\\;" \
 "uboot-env.dfu raw 0x100000 0x20000\\\\;" \
 "spare.dfu raw 0x120000 0xE0000\0" \
 "dfu_sf=run dfu_sf_info && dfu 0 sf 0:0:40000000:0 && if test -n ${dfu_alt_num} && test ${dfu_alt_num} = 1; "\
