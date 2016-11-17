@@ -300,6 +300,7 @@
 		"run read_sf && run adi_loadvals; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+		"jtagboot=env default -a;sf probe && sf protect unlock 0 100000 && run dfu_sf; \0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
 			"echo Loaded environment from ${bootenv}; " \
