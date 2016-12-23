@@ -223,6 +223,12 @@
 /* enable preboot to be loaded before CONFIG_BOOTDELAY */
 #define CONFIG_PREBOOT
 
+
+/* Initial bootstrap JTAG u-boot
+#define CONFIG_ENV_IS_NOWHERE
+#define CONFIG_BOOTCOMMAND		"run jtagboot"
+*/
+
 /* Default environment */
 #ifndef CONFIG_EXTRA_ENV_SETTINGS
 #define CONFIG_EXTRA_ENV_SETTINGS	\
@@ -232,6 +238,7 @@
 	"netmask=255.255.255.0\0"	\
 	"kernel_image=uImage\0"	\
 	"fit_load_address=0x2080000\0" \
+	"fit_config=config@2\0" \
 	"extraenv_load_address=0x207E000\0" \
 	"ramdisk_image=uramdisk.image.gz\0"	\
 	"ramdisk_load_address=0x4000000\0"	\
@@ -286,20 +293,20 @@
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
-		"bootm ${fit_load_address}\0" \
+		"bootm ${fit_load_address}#${fit_config}\0" \
 	"qspiboot_verbose=echo Copying Linux from QSPI flash to RAM... && " \
 		"run read_sf && " \
 		"if run adi_loadvals; then " \
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
-		"bootm ${fit_load_address} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+		"bootm ${fit_load_address}#${fit_config} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"qspiboot=itest *f8000258 == 480000 && echo Entering DFU SF mode ... && run clear_reset_cause && run dfu_sf; " \
 		"itest *f8000258 == 480007 && echo Entering DFU RAM mode ... && run clear_reset_cause && run ramboot_verbose; " \
 		"echo Booting silently && set stdout nulldev; " \
 		"run read_sf && run adi_loadvals; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
-		"bootm ${fit_load_address} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+		"bootm ${fit_load_address}#${fit_config} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 		"jtagboot=env default -a;sf probe && sf protect unlock 0 100000 && run dfu_sf; \0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
