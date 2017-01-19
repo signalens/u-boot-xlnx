@@ -1185,6 +1185,8 @@ static int spansion_s25fss_disable_4KB_erase(struct spi_slave *spi)
 }
 #endif
 
+int pluto_revA;
+
 int spi_flash_scan(struct spi_flash *flash)
 {
 	struct spi_slave *spi = flash->spi;
@@ -1197,6 +1199,7 @@ int spi_flash_scan(struct spi_flash *flash)
 #endif
 	u8 cmd;
 	int ret;
+
 
 #ifdef CONFIG_SPI_GENERIC
 	if (spi->option & SF_DUAL_PARALLEL_FLASH)
@@ -1235,6 +1238,11 @@ int spi_flash_scan(struct spi_flash *flash)
 
 	jedec = idcode[1] << 8 | idcode[2];
 	ext_jedec = idcode[3] << 8 | idcode[4];
+
+	if (jedec == 0xBB19 && ext_jedec == 0x1000 && idcode[5] == 0)
+		pluto_revA = 1;
+	else
+		pluto_revA = 0;
 
 	/* Validate params from spi_flash_params table */
 	params = spi_flash_params_table;
