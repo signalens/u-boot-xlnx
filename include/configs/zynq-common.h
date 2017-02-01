@@ -77,7 +77,7 @@
 "dfu_sf_info="\
 "set dfu_alt_info " \
 "boot.dfu raw 0x0 0x100000\\\\;" \
-"pluto.dfu raw 0x200000 0x1E00000\\\\;" \
+"firmware.dfu raw 0x200000 0x1E00000\\\\;" \
 "uboot-extra-env.dfu raw 0xFF000 0x1000\\\\;" \
 "uboot-env.dfu raw 0x100000 0x20000\\\\;" \
 "spare.dfu raw 0x120000 0xE0000\0" \
@@ -126,7 +126,7 @@
 	"dfu_ram_info=" \
 	"set dfu_alt_info " \
 	"dummy.dfu ram 0 0\\\\;" \
-	"pluto.dfu ram ${fit_load_address} 0x1E00000\0" \
+	"firmware.dfu ram ${fit_load_address} 0x1E00000\0" \
 	"dfu_ram=echo Entering DFU RAM mode ... && run dfu_ram_info && dfu 0 ram 0\0" \
 	"thor_ram=run dfu_ram_info && thordown 0 ram 0\0"
 
@@ -287,21 +287,21 @@
 		"sf read ${fit_load_address} 0x200000 ${fit_size} && " \
 		"iminfo ${fit_load_address} || " \
 		"sf read ${fit_load_address} 0x200000  0x1E00000; \0" \
-	"ramboot_verbose=pluto_hwref;echo Copying Linux from DFU to RAM... && " \
+	"ramboot_verbose=adi_hwref;echo Copying Linux from DFU to RAM... && " \
 		"run dfu_ram;" \
 		"if run adi_loadvals; then " \
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config}\0" \
-	"qspiboot_verbose=pluto_hwref;echo Copying Linux from QSPI flash to RAM... && " \
+	"qspiboot_verbose=adi_hwref;echo Copying Linux from QSPI flash to RAM... && " \
 		"run read_sf && " \
 		"if run adi_loadvals; then " \
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
-	"qspiboot=set stdout nulldev;pluto_hwref;test -n $PlutoRevA || gpio input 14 && set stdout serial@e0001000 && run dfu_sf;  " \
+	"qspiboot=set stdout nulldev;adi_hwref;test -n $PlutoRevA || gpio input 14 && set stdout serial@e0001000 && run dfu_sf;  " \
 		"itest *f8000258 == 480000 && run clear_reset_cause && run dfu_sf; " \
 		"itest *f8000258 == 480007 && run clear_reset_cause && run ramboot_verbose; " \
 		"echo Booting silently && set stdout nulldev; " \

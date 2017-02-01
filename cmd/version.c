@@ -97,7 +97,7 @@ U_BOOT_CMD(
 
 extern int pluto_revA;
 
-static int do_pluto_hw_version(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+static int do_adi_hw_version(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	int val, ret = 0, i;
 	char buf[16];
@@ -122,7 +122,7 @@ static int do_pluto_hw_version(cmd_tbl_t *cmdtp, int flag, int argc, char * cons
 }
 
 U_BOOT_CMD(
-	pluto_hwref, CONFIG_SYS_MAXARGS, 1, do_pluto_hw_version,
-	"determine pluto hw revsision",
+	adi_hwref, CONFIG_SYS_MAXARGS, 1, do_adi_hw_version,
+	"determine pluto/m2k hw revision",
 	""
 );
