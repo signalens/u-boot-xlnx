@@ -82,7 +82,9 @@
 
 /* Diff from config_distro_defaults.h */
 #define CONFIG_SUPPORT_RAW_INITRD
+#if !defined(CONFIG_SPL_BUILD)
 #define CONFIG_ENV_VARS_UBOOT_CONFIG
+#endif
 #define CONFIG_AUTO_COMPLETE
 
 /* PXE */
@@ -144,16 +146,40 @@
 
 # define DFU_ALT_INFO  \
 		DFU_ALT_INFO_RAM
+
+#ifndef CONFIG_SPL_BUILD
+# define CONFIG_USB_FUNCTION_FASTBOOT
+# define CONFIG_CMD_FASTBOOT
+# define CONFIG_ANDROID_BOOT_IMAGE
+# define CONFIG_FASTBOOT_BUF_ADDR 0x100000
+# define CONFIG_FASTBOOT_BUF_SIZE 0x6000000
+# define CONFIG_FASTBOOT_FLASH
+# ifdef CONFIG_ZYNQ_SDHCI
+#  define CONFIG_FASTBOOT_FLASH_MMC_DEV 0
+# endif
+# define CONFIG_PARTITION_UUIDS
+# define CONFIG_CMD_GPT
+
+# define CONFIG_RANDOM_UUID
+# define PARTS_DEFAULT \
+	"partitions=uuid_disk=${uuid_gpt_disk};" \
+	"name=""boot"",size=16M,uuid=${uuid_gpt_boot};" \
+	"name=""Linux"",size=-M,uuid=${uuid_gpt_Linux}\0"
+#endif
 #endif
 
 #if !defined(DFU_ALT_INFO)
 # define DFU_ALT_INFO
 #endif
 
+#if !defined(PARTS_DEFAULT)
+# define PARTS_DEFAULT
+#endif
+
 /* Initial environment variables */
 #ifndef CONFIG_EXTRA_ENV_SETTINGS
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"kernel_addr=0x200000\0" \
+	"kernel_addr=0x80000\0" \
 	"initrd_addr=0xa00000\0" \
 	"initrd_size=0x2000000\0" \
 	"fdt_addr=4000000\0" \
@@ -185,6 +211,10 @@
 			"run loadbootenv; " \
 			"echo Loaded environment from ${bootenv}; " \
 			"run importbootenv; " \
+		"fi; " \
+		"if test -n $uenvcmd; then " \
+			"echo Running uenvcmd ...; " \
+			"run uenvcmd; " \
 		"fi\0" \
 	"sdboot=mmc dev $sdbootdev && mmcinfo && run uenvboot || run sdroot$sdbootdev; " \
 		"load mmc $sdbootdev:$partid $fdt_addr system.dtb && " \
@@ -224,9 +254,11 @@
 	"sdroot1=setenv bootargs $bootargs root=/dev/mmcblk1p2 rw rootwait\0" \
 	"android=setenv bootargs $bootargs init=/init androidboot.selinux=disabled androidboot.hardware=$board\0" \
 	"android_debug=run android && setenv bootargs $bootargs video=DP-1:1024x768@60 drm.debug=0xf\0" \
+	"usb_dfu_spl=booti $kernel_addr - $fdt_addr\0" \
 	"usbhostboot=usb start && load usb 0 $fdt_addr system.dtb && " \
 		     "load usb 0 $kernel_addr Image && " \
 		     "booti $kernel_addr - $fdt_addr\0" \
+	PARTS_DEFAULT \
 	DFU_ALT_INFO
 #endif
 
@@ -350,13 +382,24 @@
 	DFU_ALT_INFO
 #endif
 
+/* SPL can't handle all huge variables - define just DFU */
+#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_DFU_SUPPORT)
+#undef CONFIG_EXTRA_ENV_SETTINGS
+# define CONFIG_EXTRA_ENV_SETTINGS \
+	"dfu_alt_info_ram=uboot.bin ram 0x8000000 0x1000000;" \
+			  "atf-uboot.ub ram 0x10000000 0x1000000;" \
+			  "Image ram 0x80000 0x3f80000;" \
+			  "system.dtb ram 0x4000000 0x100000\0" \
+	"dfu_bufsiz=0x1000\0"
+#endif
+
 #define CONFIG_SPL_TEXT_BASE		0xfffc0000
 #define CONFIG_SPL_STACK		0xfffffffc
-#define CONFIG_SPL_MAX_SIZE		0x20000
+#define CONFIG_SPL_MAX_SIZE		0x40000
 
 /* Just random location in OCM */
-#define CONFIG_SPL_BSS_START_ADDR	0x1000000
-#define CONFIG_SPL_BSS_MAX_SIZE		0x2000000
+#define CONFIG_SPL_BSS_START_ADDR	0x0
+#define CONFIG_SPL_BSS_MAX_SIZE		0x80000
 
 #define CONFIG_SPL_FRAMEWORK
 #define CONFIG_SPL_LIBCOMMON_SUPPORT
@@ -371,7 +414,7 @@
 #define CONFIG_SYS_SPL_ARGS_ADDR	0x8000000
 
 /* ATF is my kernel image */
-#define CONFIG_SPL_FS_LOAD_KERNEL_NAME	"atf.ub"
+#define CONFIG_SPL_FS_LOAD_KERNEL_NAME	"atf-uboot.ub"
 
 /* FIT load address for RAM boot */
 #define CONFIG_SPL_LOAD_FIT_ADDRESS	0x10000000
@@ -386,6 +429,20 @@
 # define CONFIG_SPL_LIBDISK_SUPPORT
 # define CONFIG_SPL_FAT_SUPPORT
 # define CONFIG_SPL_FS_LOAD_PAYLOAD_NAME	"u-boot.img"
+#endif
+
+#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_DFU_SUPPORT)
+# undef CONFIG_CMD_BOOTD
+# define CONFIG_SPL_ENV_SUPPORT
+# define CONFIG_SPL_HASH_SUPPORT
+# define CONFIG_ENV_MAX_ENTRIES	10
+
+# define CONFIG_SYS_SPL_MALLOC_START	0x20000000
+# define CONFIG_SYS_SPL_MALLOC_SIZE	0x100000
+
+#ifdef CONFIG_SPL_SYS_MALLOC_SIMPLE
+# error "Disable CONFIG_SPL_SYS_MALLOC_SIMPLE. Full malloc needs to be used"
+#endif
 #endif
 
 #endif /* __XILINX_ZYNQMP_H */

@@ -18,6 +18,7 @@
 #include <dwc3-uboot.h>
 #include <zynqmppl.h>
 #include <i2c.h>
+#include <g_dnl.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -85,6 +86,17 @@ static int chip_id(void)
 
 	smc_call(&regs);
 
+	/*
+	 * SMC returns:
+	 * regs[0][31:0]  = status of the operation
+	 * regs[0][63:32] = CSU.IDCODE register
+	 * regs[1][31:0]  = CSU.version register
+	 */
+	regs.regs[0] = upper_32_bits(regs.regs[0]);
+	regs.regs[0] &= ZYNQMP_CSU_IDCODE_DEVICE_CODE_MASK |
+			ZYNQMP_CSU_IDCODE_SVD_MASK;
+	regs.regs[0] >>= ZYNQMP_CSU_IDCODE_SVD_SHIFT;
+
 	return regs.regs[0];
 }
 
@@ -94,9 +106,8 @@ static char *zynqmp_get_silicon_idcode_name(void)
 
 	id = chip_id();
 	for (i = 0; i < ARRAY_SIZE(zynqmp_devices); i++) {
-		if (zynqmp_devices[i].id == id) {
+		if (zynqmp_devices[i].id == id)
 			return zynqmp_devices[i].name;
-		}
 	}
 	return "unknown";
 }
@@ -108,13 +119,15 @@ int board_init(void)
 {
 	printf("EL Level:\tEL%d\n", current_el());
 
-#if defined(CONFIG_FPGA) && defined(CONFIG_FPGA_ZYNQMPPL) && !defined(CONFIG_SPL_BUILD) || \
-    (defined(CONFIG_SPL_FPGA_SUPPORT) && defined(CONFIG_SPL_BUILD))
+#if defined(CONFIG_FPGA) && defined(CONFIG_FPGA_ZYNQMPPL) && \
+    !defined(CONFIG_SPL_BUILD) || (defined(CONFIG_SPL_FPGA_SUPPORT) && \
+    defined(CONFIG_SPL_BUILD))
 	if (current_el() != 3) {
 		static char version[ZYNQMP_VERSION_SIZE];
 
 		strncat(version, "xczu", ZYNQMP_VERSION_SIZE);
-		zynqmppl.name = strncat(version, zynqmp_get_silicon_idcode_name(),
+		zynqmppl.name = strncat(version,
+					zynqmp_get_silicon_idcode_name(),
 					ZYNQMP_VERSION_SIZE);
 		printf("Chip ID:\t%s\n", zynqmppl.name);
 		fpga_init();
@@ -340,6 +353,11 @@ int board_late_init(void)
 
 	puts("Bootmode: ");
 	switch (bootmode) {
+	case USB_MODE:
+		puts("USB_MODE\n");
+		mode = "usb";
+		setenv("modeboot", "usb_dfu_spl");
+		break;
 	case JTAG_MODE:
 		puts("JTAG_MODE\n");
 		mode = "pxe dhcp";
@@ -361,6 +379,9 @@ int board_late_init(void)
 		mode = "mmc0";
 		setenv("modeboot", "sdboot");
 		break;
+	case SD1_LSHFT_MODE:
+		puts("LVL_SHFT_");
+		/* fall through */
 	case SD_MODE1:
 		puts("SD_MODE1\n");
 #if defined(CONFIG_ZYNQ_SDHCI0) && defined(CONFIG_ZYNQ_SDHCI1)
@@ -416,15 +437,19 @@ static struct dwc3_device dwc3_device_data1 = {
 	.index = 1,
 };
 
-int usb_gadget_handle_interrupts(void)
+int usb_gadget_handle_interrupts(int index)
 {
-	dwc3_uboot_handle_interrupt(0);
+	dwc3_uboot_handle_interrupt(index);
 	return 0;
 }
 
 int board_usb_init(int index, enum usb_init_type init)
 {
 	debug("%s: index %x\n", __func__, index);
+
+#if defined(CONFIG_USB_GADGET_DOWNLOAD)
+	g_dnl_set_serialnumber(CONFIG_SYS_CONFIG_NAME);
+#endif
 
 	switch (index) {
 	case 0:
