@@ -248,7 +248,7 @@
 	"boot_image=BOOT.bin\0"	\
 	"loadbit_addr=0x100000\0"	\
 	"loadbootenv_addr=0x2000000\0" \
-	"fit_size=0x800000\0"	\
+	"fit_size=0x900000\0"	\
 	"devicetree_size=0x20000\0"	\
 	"ramdisk_size=0x400000\0"	\
 	"bitstream_size=0x400000\0" \
@@ -292,14 +292,14 @@
 		"if run adi_loadvals; then " \
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
-		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
+		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=1 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config}\0" \
 	"qspiboot_verbose=adi_hwref;echo Copying Linux from QSPI flash to RAM... && " \
 		"run read_sf && " \
 		"if run adi_loadvals; then " \
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
-		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
+		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=1 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"qspiboot=set stdout nulldev;adi_hwref;test -n $PlutoRevA || gpio input 14 && set stdout serial@e0001000 && run dfu_sf;  " \
 		"set stdout serial@e0001000;" \
@@ -309,7 +309,7 @@
 		"itest *f8000258 == 480002 && run clear_reset_cause && exit; " \
 		"echo Booting silently && set stdout nulldev; " \
 		"run read_sf && run adi_loadvals; " \
-		"envversion;setenv bootargs console=ttyPS0,115200 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
+		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=1 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"jtagboot=env default -a;sf probe && sf protect unlock 0 100000 && run dfu_sf; \0" \
 	"uenvboot=" \
