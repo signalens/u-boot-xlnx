@@ -266,21 +266,17 @@
 				"then env run importbootenv; " \
 			"fi; " \
 		"fi; \0" \
-	"adi_loadvals=if test -n ${ad936x_ext_refclk}; then " \
-		"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
-		"fdt addr ${fdtaddr} && " \
-		"fdt set /clocks/clock@0 clock-frequency ${ad936x_ext_refclk}; " \
+	"adi_loadvals=fdt addr ${fit_load_address} && fdt get value fdt_choosen /configurations/${fit_config}/ fdt && " \
+		"fdt get addr fdtaddr /images/${fdt_choosen} data && fdt addr ${fdtaddr}; "\
+		"if test -n ${ad936x_ext_refclk}  && test ! -n ${ad936x_skip_ext_refclk}; then " \
+			"fdt set /clocks/clock@0 clock-frequency ${ad936x_ext_refclk}; " \
 		"fi; " \
 		"if test -n ${model}; then " \
-		"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
-			"fdt addr ${fdtaddr} && " \
 			"fdt set / model ${model}; " \
 		"fi; " \
-		"if test -n ${attr_name}; then " \
-			"fdt addr ${fit_load_address} && fdt get addr fdtaddr /images/fdt@1 data && " \
-			"fdt addr ${fdtaddr} && " \
+		"if test -n ${attr_name} && test -n ${attr_val}; then " \
 			"fdt set /amba/spi@e0006000/ad9361-phy@0 ${attr_name} ${attr_val}; " \
-		 "fi \0" \
+		"fi \0" \
 	"qspiboot_extraenv=sf read ${extraenv_load_address} 0xFF000 0x1000 && " \
 		"env import -c ${extraenv_load_address} 0x1000 || true \0" \
 	"read_sf=sf probe 0:0 50000000 0 && run qspiboot_extraenv &&" \
