@@ -256,6 +256,7 @@
 	"fdt_high=0x20000000\0"	\
 	"initrd_high=0x20000000\0"	\
 	"bootenv=uEnv.txt\0" \
+	"maxcpus=1\0" \
 	"clear_reset_cause=mw f8000008 df0d && mw f8000258 00400000 && mw f8000004 767b\0" \
 	"loadbootenv=load mmc 0 ${loadbootenv_addr} ${bootenv}\0" \
 	"importbootenv=echo Importing environment from SD ...; " \
@@ -288,14 +289,14 @@
 		"if run adi_loadvals; then " \
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
-		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=1 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
+		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=${maxcpus} rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config}\0" \
 	"qspiboot_verbose=adi_hwref;echo Copying Linux from QSPI flash to RAM... && " \
 		"run read_sf && " \
 		"if run adi_loadvals; then " \
 		"echo Loaded AD936x refclk frequency and model into devicetree; " \
 		"fi; " \
-		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=1 rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
+		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=${maxcpus} rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"qspiboot=set stdout nulldev;adi_hwref;test -n $PlutoRevA || gpio input 14 && set stdout serial@e0001000 && run dfu_sf;  " \
 		"set stdout serial@e0001000;" \
@@ -305,7 +306,7 @@
 		"itest *f8000258 == 480002 && run clear_reset_cause && exit; " \
 		"echo Booting silently && set stdout nulldev; " \
 		"run read_sf && run adi_loadvals; " \
-		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=1 rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
+		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=${maxcpus} rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
 	"jtagboot=env default -a;sf probe && sf protect unlock 0 100000 && run dfu_sf; \0" \
 	"uenvboot=" \
