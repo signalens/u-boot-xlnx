@@ -304,7 +304,7 @@ extern "C" {
  */
 #define XADCPS_PD_MODE_NONE		0  /**< No Power Down  */
 #define XADCPS_PD_MODE_ADCB		1  /**< Power Down ADC B */
-#define XADCPS_PD_MODE_XADC		2  /**< Power Down ADC A and ADC B */
+#define XADCPS_PD_MODE_XADC		3  /**< Power Down ADC A and ADC B */
 /*@}*/
 
 /**************************** Type Definitions ******************************/
