@@ -80,12 +80,13 @@ static int do_xadc(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 	} while (cnt--);
 
+	XAdcPs_SetPowerdownMode(XAdcInstPtr, XADCPS_PD_MODE_XADC);
+
 	val = ((RawData >> 4) * 1000) / 0xFFF;
 
 	snprintf(buf, sizeof(buf), "%d", val);
 
 	printf("%s\n", buf);
-
 	return val;
 }
 
