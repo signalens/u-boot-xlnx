@@ -299,7 +299,7 @@
 		"fi; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=${maxcpus} rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
-	"qspiboot=set stdout nulldev;adi_hwref;test -n $PlutoRevA || gpio input 14 && set stdout serial@e0001000 && run dfu_sf;  " \
+	"qspiboot=set stdout nulldev;adi_hwref;test -n $PlutoRevA || gpio input 14 && set stdout serial@e0001000 && sf probe && sf protect lock 0 100000 && run dfu_sf;  " \
 		"set stdout serial@e0001000;" \
 		"itest *f8000258 == 480003 && run clear_reset_cause && run dfu_sf; " \
 		"itest *f8000258 == 480007 && run clear_reset_cause && run ramboot_verbose; " \
@@ -308,7 +308,7 @@
 		"echo Booting silently && set stdout nulldev; " \
 		"run read_sf && run adi_loadvals; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=${maxcpus} rootfstype=ramfs root=/dev/ram0 rw quiet loglevel=4 uboot=\"${uboot-version}\" && " \
-		"bootm ${fit_load_address}#${fit_config} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
+		"bootm ${fit_load_address}#${fit_config} || set stdout serial@e0001000;echo BOOT failed entering DFU mode ... && sf protect lock 0 100000 && run dfu_sf \0" \
 	"jtagboot=env default -a;sf probe && sf protect unlock 0 100000 && run dfu_sf; \0" \
 	"uenvboot=" \
 		"if run loadbootenv; then " \
