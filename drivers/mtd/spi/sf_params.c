@@ -142,6 +142,7 @@ const struct spi_flash_params spi_flash_params_table[] = {
 	{"IS25LP032",	   0x9d6016, 0x0,	64 * 1024,    64, RD_EXTN | QUAD_IO_FAST,     WR_QPP},
 	{"IS25LP064",	   0x9d6017, 0x0,	64 * 1024,   128, RD_EXTN | QUAD_IO_FAST,     WR_QPP},
 	{"IS25LP128",	   0x9d6018, 0x0,	64 * 1024,   256, RD_EXTN | QUAD_IO_FAST,     WR_QPP},
+	{"IS25WP256D",	   0x9d7019, 0x0,	64 * 1024,   512, RD_EXTN | QUAD_IO_FAST,     WR_QPP | SECT_4K},
 #endif
 	{},	/* Empty entry to terminate the list */
 	/*
