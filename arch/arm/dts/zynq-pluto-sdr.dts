@@ -10,7 +10,7 @@
 
 / {
 	model = "Zynq Pluto SDR Board";
-	compatible = "xlnx,zynq-picozed-sdr2", "xlnx,zynq-7000";
+	compatible = "xlnx,zynq-7000";
 
 	aliases {
 		ethernet0 = &gem0;
