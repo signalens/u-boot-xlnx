@@ -1,7 +1,7 @@
 /*
- * Avnet PicoZED SDR2 board DTS
+ * Analog Devices Inc. Pluto SDR board DTS
  *
- * Copyright (C) 2015 Analog Devices Inc.
+ * Copyright (C) 2015-2018 Analog Devices Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
