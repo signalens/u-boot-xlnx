@@ -1,7 +1,7 @@
 /*
- * Analog Devices Inc. Pluto SDR board DTS
+ * Epiq Solutions Sidekiq Z2 board DTS
  *
- * Copyright (C) 2015-2018 Analog Devices Inc.
+ * Copyright (C) 2018 Analog Devices Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -9,7 +9,7 @@
 #include "zynq-7000.dtsi"
 
 / {
-	model = "Zynq Pluto SDR Board";
+	model = "Zynq Sidekiq Z2 Board";
 	compatible = "xlnx,zynq-7000";
 
 	aliases {
