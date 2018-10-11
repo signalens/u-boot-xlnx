@@ -118,11 +118,11 @@ static int xilinx_spi_child_pre_probe(struct udevice *bus)
 	struct udevice *dev = dev_get_parent(bus);
 	int spimode;
 
-	spimode = fdtdec_get_int(gd->fdt_blob, dev->of_offset, "xlnx,spi-mode",
+	spimode = fdtdec_get_int(gd->fdt_blob, dev_of_offset(dev), "xlnx,spi-mode",
 				 -1);
 
 	if (spimode == XILINX_SPI_QUAD_MODE)
-		slave->op_mode_rx = SPI_OPM_RX_QOF;
+		slave->mode = SPI_RX_QUAD;
 
 	return 0;
 }
@@ -268,7 +268,8 @@ static int xilinx_spi_xfer(struct udevice *dev, unsigned int bitlen,
 		reg = readl(&regs->spicr) & ~SPICR_MASTER_INHIBIT;
 		writel(reg, &regs->spicr);
 		txbytes -= count;
-		txp += count;
+		if (txp)
+			txp += count;
 
 		timeout = 10000000;
 		do {
@@ -283,7 +284,8 @@ static int xilinx_spi_xfer(struct udevice *dev, unsigned int bitlen,
 		debug("txbytes:0x%x,txp:0x%p\n", txbytes, txp);
 		count = xilinx_spi_read_rxfifo(bus, rxp, rxbytes);
 		rxbytes -= count;
-		rxp += count;
+		if (rxp)
+			rxp += count;
 		debug("rxbytes:0x%x rxp:0x%p\n", rxbytes, rxp);
 	}
 
@@ -344,11 +346,11 @@ static int xilinx_spi_ofdata_to_platdata(struct udevice *bus)
 {
 	struct xilinx_spi_priv *priv = dev_get_priv(bus);
 
-	priv->regs = (struct xilinx_spi_regs *)dev_get_addr(bus);
+	priv->regs = (struct xilinx_spi_regs *)devfdt_get_addr(bus);
 
 	debug("%s: regs=%p\n", __func__, priv->regs);
 
-	priv->fifo_depth = fdtdec_get_int(gd->fdt_blob, bus->of_offset,
+	priv->fifo_depth = fdtdec_get_int(gd->fdt_blob, dev_of_offset(bus),
 					  "fifo-size", 0);
 
 	return 0;
