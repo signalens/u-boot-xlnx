@@ -128,6 +128,7 @@ dtb-$(CONFIG_ARCH_UNIPHIER_SLD8) += \
 	uniphier-sld8-ref.dtb
 
 dtb-$(CONFIG_ARCH_ZYNQ) += \
+	zynq-adrv9361.dtb \
 	zynq-cc108.dtb \
 	zynq-cse-nand.dtb \
 	zynq-cse-nor.dtb \
@@ -140,7 +141,6 @@ dtb-$(CONFIG_ARCH_ZYNQ) += \
 	zynq-cse-qspi-x2-stacked.dtb \
 	zynq-microzed.dtb \
 	zynq-picozed.dtb \
-	zynq-picozed-sdr2.dtb \
 	zynq-syzygy-hub.dtb \
 	zynq-topic-miami.dtb \
 	zynq-topic-miamilite.dtb \

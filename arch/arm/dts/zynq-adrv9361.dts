@@ -1,7 +1,7 @@
 /*
- * Avnet PicoZED SDR2 board DTS
+ * Analog Devices Inc. ADRV9361-Z7035 board DTS
  *
- * Copyright (C) 2015 Analog Devices Inc.
+ * Copyright (C) 2015-2018 Analog Devices Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -9,8 +9,8 @@
 #include "zynq-7000.dtsi"
 
 / {
-	model = "Zynq PicoZed SDR2 Board";
-	compatible = "xlnx,zynq-picozed-sdr2", "xlnx,zynq-7000";
+	model = "Analog Devices ADRV9361-Z7035 (Z7035/AD9361)";
+	compatible = "adi,adrv9361", "xlnx,zynq-7000";
 
 	aliases {
 		ethernet0 = &gem0;
