@@ -1,0 +1,24 @@
+language: c
+
+os: linux
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+matrix:
+  include:
+    - env: DEFCONFIG=zynq_adrv9361_defconfig ARCH=arm
+    - env: DEFCONFIG=zynq_adrv9364_defconfig ARCH=arm
+    - env: DEFCONFIG=zynq_coraz7_defconfig ARCH=arm
+    - env: DEFCONFIG=zynq_microzed_defconfig ARCH=arm
+    - env: DEFCONFIG=zynq_picozed_defconfig ARCH=arm
+    - env: DEFCONFIG=zynq_zc702_defconfig ARCH=arm
+    - env: DEFCONFIG=zynq_zc706_defconfig ARCH=arm
+    - env: DEFCONFIG=zynq_zed_defconfig ARCH=arm
+    - env: DEFCONFIG=xilinx_zynqmp_zcu102_rev1_0_defconfig ARCH=arm
+    - env: DEFCONFIG=adi_zynqmp_adrv9009_zu11eg_adrv2crr_fmc_defconfig ARCH=arm
+
+script:
+  - ./ci/travis/run-build-docker.sh
