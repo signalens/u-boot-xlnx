@@ -1,7 +1,7 @@
 /*
- * Analog Devices Inc. Pluto SDR board DTS
+ * MicroPhase Inc. ANTSDR board DTS
  *
- * Copyright (C) 2015-2018 Analog Devices Inc.
+ * Copyright (C) 2015-2018 MicroPhase Inc.
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -9,7 +9,7 @@
 #include "zynq-7000.dtsi"
 
 / {
-	model = "Zynq Pluto SDR Board";
+	model = "ANT SDR Board";
 	compatible = "xlnx,zynq-7000";
 
 	aliases {
@@ -33,14 +33,34 @@
 		compatible = "usb-nop-xceiv";
 		#phy-cells = <0>;
 	};
+	gpio_keys {
+		compatible = "gpio-keys";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		button {
+			label = "Button";
+			gpios = <&gpio0 14 0>;
+			linux,code = <103>; /* up */
+			wakeup-source;
+			autorepeat;
+		};
+
+	};
+	
+	
 };
+
+
+
+	
+
 
 &qspi {
 	status = "okay";
 	is-dual = <0>;
 	num-cs = <1>;
 	flash@0 {
-		compatible = "n25q256a11,";
+		compatible = "n25q512a","micron,m25p80";
 		reg = <0x0>;
 		spi-tx-bus-width = <1>;
 		spi-rx-bus-width = <4>;
@@ -72,6 +92,22 @@
 
 &usb0 {
 	status = "okay";
-	dr_mode = "otg";
+	dr_mode = "host";
 	usb-phy = <&usb_phy0>;
+};
+&sdhci0 {
+	u-boot,dm-pre-reloc;
+	status = "okay";
+	
+};
+
+&gem0 {
+	status = "okay";
+	phy-mode = "rgmii-id";
+	phy-handle = <&ethernet_phy0>;
+
+	ethernet_phy0: ethernet-phy@0 {
+		reg = <0>;
+		reset-gpios = <&gpio0 46 0>;
+	};
 };
