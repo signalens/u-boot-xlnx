@@ -280,13 +280,13 @@
 			"fdt set /clocks/clock@0 clock-frequency ${ad936x_ext_refclk_override}; " \
 		"fi; " \
 		"if test ${refclk_source} = internal || test ! \"${model}\" = \"Analog Devices PlutoSDR Rev.C (Z7010/AD9363)\" ; then " \
-			"fdt rm /amba/gpio@e000a000/clock_extern_en; " \
+			"fdt rm /axi/gpio@e000a000/clock_extern_en; " \
 		"fi; " \
 		"if test -n ${attr_name} && test -n ${attr_val}; then " \
-			"fdt set /amba/spi@e0006000/ad9361-phy@0 ${attr_name} ${attr_val}; " \
+			"fdt set /axi/spi@e0006000/ad9361-phy@0 ${attr_name} ${attr_val}; " \
                 "fi; " \
 		"if test ${refclk_source} = external || test ! \"${model}\" = \"Analog Devices PlutoSDR Rev.C (Z7010/AD9363)\" ; then " \
-			"fdt rm /amba/gpio@e000a000/clock_internal_en; " \
+			"fdt rm /axi/gpio@e000a000/clock_internal_en; " \
 		"fi; " \
 		"if test -n ${compatible} && test ! ${compatible} = ad9361 && test ! ${compatible} = ad9364 && test ! ${compatible} = ad9364; then " \
 			"setenv compatible ad9364; " \
@@ -301,20 +301,20 @@
 			"saveenv; " \
 		"fi; " \
 		"if test -n ${compatible}; then " \
-			"fdt set /amba/spi@e0006000/ad9361-phy@0 compatible ${compatible}; " \
+			"fdt set /axi/spi@e0006000/ad9361-phy@0 compatible ${compatible}; " \
 		"fi; " \
 		"if test  ${compatible} = ad9361 && test ! \"${model}\" = \"Analog Devices PlutoSDR Rev.C (Z7010/AD9363)\" ; then " \
-			"fdt set /amba/spi@e0006000/ad9361-phy@0 compatible ad9364; " \
+			"fdt set /axi/spi@e0006000/ad9361-phy@0 compatible ad9364; " \
 			"compatible=ad9364; " \
 		"fi; " \
 		"if test ${mode} = 1r1t || test ! \"${model}\" = \"Analog Devices PlutoSDR Rev.C (Z7010/AD9363)\"; then " \
-			"fdt rm /amba/spi@e0006000/ad9361-phy@0 adi,2rx-2tx-mode-enable; " \
+			"fdt rm /axi/spi@e0006000/ad9361-phy@0 adi,2rx-2tx-mode-enable; " \
 		"fi; " \
 		"if test -n ${cs_gpio}; then " \
-			"fdt set /amba/axi_quad_spi@7C430000/ cs-gpios \"<0x06 ${cs_gpio} 0>\"; " \
+			"fdt set /axi/axi_quad_spi@7C430000/ cs-gpios \"<0x06 ${cs_gpio} 0>\"; " \
 		"fi; " \
-		"if test ${compatible} = ad9364 || test -n ${attr_val} = ad9364; then " \
-			"fdt rm /amba/spi@e0006000/ad9361-phy@0 adi,2rx-2tx-mode-enable; " \
+		"if test \"${compatible}\" = ad9364 || test  \"${attr_val}\" = ad9364; then " \
+			"fdt rm /axi/spi@e0006000/ad9361-phy@0 adi,2rx-2tx-mode-enable; " \
 			"fdt set /fpga-axi/cf-ad9361-dds-core-lpc@79024000 compatible adi,axi-ad9364-dds-6.00.a; " \
 			"setenv mode 1r1t; " \
 			"saveenv; " \
@@ -339,7 +339,7 @@
 		"fi; " \
 		"envversion;setenv bootargs console=ttyPS0,115200 maxcpus=${maxcpus} rootfstype=ramfs root=/dev/ram0 rw earlyprintk uboot=\"${uboot-version}\" && " \
 		"bootm ${fit_load_address}#${fit_config} || echo BOOT failed entering DFU mode ... && run dfu_sf \0" \
-	"qspiboot=set stdout nulldev;adi_hwref;test -n $PlutoRevA || gpio input 14 && set stdout serial@e0001000 && sf probe && sf protect lock 0 100000 && run dfu_sf;  " \
+	"qspiboot=set stdout nulldev;run read_sf;adi_hwref;test -n $PlutoRevA || gpio input 14 && set stdout serial@e0001000 && sf probe && sf protect lock 0 100000 && run dfu_sf;  " \
 		"set stdout serial@e0001000;" \
 		"itest *f8000258 == 480003 && run clear_reset_cause && run dfu_sf; " \
 		"itest *f8000258 == 480007 && run clear_reset_cause && run ramboot_verbose; " \
