@@ -9,7 +9,7 @@
 #include "zynq-7000.dtsi"
 
 / {
-	model = "ANT SDR Board";
+	model = "MicroPhase, ANTSDR-E310";
 	compatible = "xlnx,zynq-7000";
 
 	aliases {
