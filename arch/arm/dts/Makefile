@@ -104,6 +104,7 @@ dtb-$(CONFIG_ARCH_ZYNQ) += zynq-zc702.dtb \
 	zynq-zc770-xm013.dtb \
 	zynq-antsdre200.dtb \
 	zynq-e310v2.dtb \
+	zynq-t310.dtb \
 	zynq-ant.dtb 
 dtb-$(CONFIG_ARCH_ZYNQMP) += \
 	zynqmp-ep108.dtb			\
