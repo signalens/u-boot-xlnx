@@ -14,7 +14,7 @@
 
 	aliases {
 		ethernet0 = &gem0;
-		serial0 = &uart0;
+		serial0 = &uart1;
 		spi0 = &qspi;
 	};
 
@@ -25,8 +25,8 @@
 
 	chosen {
 		bootargs = "earlyprintk";
-		linux,stdout-path = &uart0;
-		stdout-path = &uart0;
+		linux,stdout-path = &uart1;
+		stdout-path = &uart1;
 	};
 
 	usb_phy0: phy0 {
